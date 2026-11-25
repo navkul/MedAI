@@ -9,7 +9,7 @@
   "n_clinical_features": 3,
   "device": "cpu",
   "tabpfn_version": "2.0.0",
-  "data_path": "/Users/felixtuchscherer/Desktop/MedAI/data/train.csv",
+  "data_path": "data/train.csv",
   "train_auc": 0.9107522123893805,
   "train_log_loss": 0.4182756824838246
 }

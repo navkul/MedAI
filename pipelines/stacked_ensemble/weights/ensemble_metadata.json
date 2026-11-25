@@ -1,7 +1,7 @@
 {
   "bundle_version": 1,
-  "data_path": "/Users/felixtuchscherer/Desktop/MedAI/data/train.csv",
-  "results_dir": "/Users/felixtuchscherer/Desktop/MedAI/kidney/results",
+  "data_path": "data/train.csv",
+  "results_dir": "pipelines/stacked_ensemble/results",
   "recipe_type": "single_model",
   "candidate_name": "xgb_fs1",
   "base_model_names": [

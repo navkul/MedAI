@@ -1,5 +1,5 @@
 {
-  "data_path": "/Users/arnavkulkarni/Developer/medAI-hackathon/MedAI/data/train.csv",
+  "data_path": "data/train.csv",
   "seed": 42,
   "xgb_top_k": 90,
   "xgb_feature_selector": "stable_anova",

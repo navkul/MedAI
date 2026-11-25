@@ -1,5 +1,5 @@
 {
-  "data_path": "/Users/felixtuchscherer/Desktop/MedAI/data/train.csv",
+  "data_path": "data/train.csv",
   "n_samples": 426,
   "n_features_total": 6595,
   "n_folds": 5,

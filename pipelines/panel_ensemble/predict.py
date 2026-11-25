@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-predict.py — Run the trained Nav bundle on new data
+predict.py — Run the trained panel ensemble bundle on new data
 ===================================================
 """
 

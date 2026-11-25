@@ -2,7 +2,7 @@
 
 This track compares selected-feature XGBoost with ridge logistic regression,
 shrinkage linear discriminant analysis (LDA), and partial least squares (PLS)
-followed by logistic regression. See the [project README](../README.md) for
+followed by logistic regression. See the [project README](../../README.md) for
 the task, dataset, recorded results, and validation limitations.
 
 ## Setup
@@ -10,7 +10,7 @@ the task, dataset, recorded results, and validation limitations.
 From the repository root, use Python 3.12 and an activated virtual environment:
 
 ```bash
-python -m pip install -r Nav/requirements.txt
+python -m pip install -r pipelines/panel_ensemble/requirements.txt
 ```
 
 `requirements-local.txt` remains a compatibility alias to the same dependencies.
@@ -39,11 +39,13 @@ and cross-fitted convex blends. OOF log loss selects the final recipe.
 Run from the repository root:
 
 ```bash
-python Nav/evaluate.py --data data/train.csv --out Nav/results/current
-python Nav/train.py --data data/train.csv \
-  --recipe Nav/results/current/final_recipe.json --out Nav/weights
-python Nav/predict.py --data /path/to/new_samples.csv \
-  --model-dir Nav/weights --out predictions_nav.csv
+python pipelines/panel_ensemble/evaluate.py --data data/train.csv \
+  --out pipelines/panel_ensemble/results/current
+python pipelines/panel_ensemble/train.py --data data/train.csv \
+  --recipe pipelines/panel_ensemble/results/current/final_recipe.json \
+  --out pipelines/panel_ensemble/weights
+python pipelines/panel_ensemble/predict.py --data /path/to/new_samples.csv \
+  --model-dir pipelines/panel_ensemble/weights --out predictions_panel.csv
 ```
 
 Evaluation defaults to five folds and three repeats. `--models` accepts quoted
@@ -51,7 +53,8 @@ model names; `--blend-models` controls eligibility for blending.
 `--xgb-model-seeds` enables seed averaging. For a shorter run:
 
 ```bash
-python Nav/evaluate.py --data data/train.csv --out Nav/results/quick \
+python pipelines/panel_ensemble/evaluate.py --data data/train.csv \
+  --out pipelines/panel_ensemble/results/quick \
   --folds 3 --repeats 1 --xgb-n-jobs 1 \
   --models "Selected XGBoost" "Selected Ridge LR"
 ```
@@ -67,10 +70,10 @@ blend (0.41 / 0.12 / 0.32 / 0.15) and logs the fallback. Inference loads
 in `--model-dir`.
 
 ```bash
-bash Nav/predict.sh /path/to/new_samples.csv predictions_nav.csv
-python Nav/evaluate.py --help
-python Nav/train.py --help
-python Nav/predict.py --help
+bash pipelines/panel_ensemble/predict.sh /path/to/new_samples.csv predictions_panel.csv
+python pipelines/panel_ensemble/evaluate.py --help
+python pipelines/panel_ensemble/train.py --help
+python pipelines/panel_ensemble/predict.py --help
 ```
 
 The wrapper uses the caller's active environment; `MEDAI_PYTHON` can override
@@ -79,9 +82,6 @@ component probabilities for ensembles, and `true_label` for labeled inputs.
 
 ## Experiment history
 
-- [FINDINGS.md](FINDINGS.md): historical search results and unsuccessful approaches.
-- [EXPLAIN.md](EXPLAIN.md): rationale for compact panels and complementary models.
-- [research-summary.md](research-summary.md): background from challenge research.
 - [results/selected_models/](results/selected_models/): saved five-fold comparison.
 
 These records predate the current recipe-driven evaluator. Re-run evaluation to

@@ -25,19 +25,20 @@ The local snapshot contains 200 positive and 226 negative examples.
 **Log loss** is the primary selection metric; **AUROC** measures ranking
 performance. Clinical-only, eGFR-only, and no-eGFR ablations assess reliance on
 clinical proxies. Scripts default to `data/train.csv` and accept `--data` paths.
-Use cohort data according to its access conditions. The local snapshot is smaller
-than the planned cohort sizes in the original research notes.
+The cohort data is not included in this repository; place an authorized copy at
+`data/train.csv`. The local snapshot is smaller than the planned cohort sizes in
+the challenge materials.
 
 ## Modeling approaches
 
-The three workspaces preserve distinct hackathon experiments and artifact
+The three pipelines preserve distinct hackathon experiments and artifact
 formats. They remain separate so historical models can still be loaded.
 
-| Track | Approaches | Engineering focus |
+| Pipeline | Approaches | Engineering focus |
 | --- | --- | --- |
-| [`kidney/`](kidney/README.md) | XGBoost, optional LightGBM, elastic-net logistic regression; convex blending, ridge stacking, sigmoid-calibrated stacking | Repeated stratified CV, seed averaging, clinical ablations, top-k and stability selection |
-| [`Nav/`](Nav/README.md) | Starter, selected-feature, and proteomics-only XGBoost, ridge logistic regression, shrinkage LDA, PLS + logistic regression; fixed and learned blends | Stable ANOVA selection, complementary model families, and compact protein panels |
-| [`Felix/kidney/`](Felix/kidney/README.md) | TabPFN v2 with top-k proteins and clinical covariates | Pretrained tabular classification after reducing the feature space |
+| [`stacked_ensemble`](pipelines/stacked_ensemble/README.md) | XGBoost, optional LightGBM, elastic-net logistic regression; convex blending, ridge stacking, sigmoid-calibrated stacking | Repeated stratified CV, seed averaging, clinical ablations, top-k and stability selection |
+| [`panel_ensemble`](pipelines/panel_ensemble/README.md) | Starter, selected-feature, and proteomics-only XGBoost, ridge logistic regression, shrinkage LDA, PLS + logistic regression; fixed and learned blends | Stable ANOVA selection, complementary model families, and compact protein panels |
+| [`tabpfn`](pipelines/tabpfn/README.md) | TabPFN v2 with top-k proteins and clinical covariates | Pretrained tabular classification after reducing the feature space |
 
 Protein ranking is fitted on each training fold. Linear pipelines fit imputation
 and scaling on training data. Out-of-fold (OOF) probabilities support ensemble
@@ -57,8 +58,8 @@ flowchart LR
 ## Recorded results
 
 These values are arithmetic means across the five folds in the saved
-[Nav experiment](Nav/results/selected_models/cv_results.csv). They describe a
-historical local run, not an external test or leaderboard result.
+[panel ensemble experiment](pipelines/panel_ensemble/results/selected_models/cv_results.csv).
+They describe a historical local run, not an external test or leaderboard result.
 
 | Model | Mean fold log loss ↓ | Mean fold AUROC ↑ |
 | --- | ---: | ---: |
@@ -98,12 +99,13 @@ From the repository root:
 
 ```bash
 # Omit --models to run the full default model ladder.
-python kidney/evaluate.py --data data/train.csv --out kidney/results \
+python pipelines/stacked_ensemble/evaluate.py --data data/train.csv \
+  --out pipelines/stacked_ensemble/results \
   --models xgb_fs1 xgb_fs2 elastic_fs2 clinical_lr egfr_only_lr clinical_no_egfr_lr
-python kidney/train.py --data data/train.csv \
-  --results-dir kidney/results --out kidney/weights
-python kidney/predict.py --data /path/to/new_samples.csv \
-  --model-dir kidney/weights --out predictions.csv
+python pipelines/stacked_ensemble/train.py --data data/train.csv \
+  --results-dir pipelines/stacked_ensemble/results --out pipelines/stacked_ensemble/weights
+python pipelines/stacked_ensemble/predict.py --data /path/to/new_samples.csv \
+  --model-dir pipelines/stacked_ensemble/weights --out predictions.csv
 ```
 
 Evaluation defaults to five folds and three repeats. For a shorter run, pass
@@ -116,33 +118,38 @@ Optional approaches:
 ```bash
 # LightGBM
 python -m pip install -r requirements/lightgbm.txt
-python kidney/evaluate.py --data data/train.csv --out kidney/results_lgbm \
+python pipelines/stacked_ensemble/evaluate.py --data data/train.csv \
+  --out pipelines/stacked_ensemble/results_lgbm \
   --models xgb_fs2 lgbm_fs2 elastic_fs2
 
-# Nav: selected boosting, linear, LDA, and PLS models
-python Nav/evaluate.py --data data/train.csv --out Nav/results/current
-python Nav/train.py --data data/train.csv \
-  --recipe Nav/results/current/final_recipe.json --out Nav/weights
-python Nav/predict.py --data /path/to/new_samples.csv --out predictions_nav.csv
+# Panel ensemble: selected boosting, linear, LDA, and PLS models
+python pipelines/panel_ensemble/evaluate.py --data data/train.csv \
+  --out pipelines/panel_ensemble/results/current
+python pipelines/panel_ensemble/train.py --data data/train.csv \
+  --recipe pipelines/panel_ensemble/results/current/final_recipe.json \
+  --out pipelines/panel_ensemble/weights
+python pipelines/panel_ensemble/predict.py --data /path/to/new_samples.csv \
+  --out predictions_panel.csv
 
 # TabPFN; install in a separate environment if preferred
-python -m pip install -r Felix/kidney/requirements.txt
-python Felix/kidney/evaluate.py --data data/train.csv --protein-top-k 100
-python Felix/kidney/train.py --data data/train.csv --protein-top-k 100
-python Felix/kidney/predict.py --data /path/to/new_samples.csv --out predictions_tabpfn.csv
+python -m pip install -r pipelines/tabpfn/requirements.txt
+python pipelines/tabpfn/evaluate.py --data data/train.csv --protein-top-k 100
+python pipelines/tabpfn/train.py --data data/train.csv --protein-top-k 100
+python pipelines/tabpfn/predict.py --data /path/to/new_samples.csv \
+  --out predictions_tabpfn.csv
 ```
 
 TabPFN uses its local Python classifier. The first model run may download a
 checkpoint and needs network access unless it is cached. Device and ensemble
-settings are exposed through CLI flags. See each track's README and `--help`
+settings are exposed through CLI flags. See each pipeline's README and `--help`
 for the full options.
 
 Each `predict.sh` uses the active Python environment. `MEDAI_PYTHON` can supply
 an explicit interpreter for evaluation runners:
 
 ```bash
-MEDAI_PYTHON="$PWD/.venv/bin/python" bash kidney/predict.sh \
-  /path/to/new_samples.csv predictions.csv --model-dir kidney/weights
+MEDAI_PYTHON="$PWD/.venv/bin/python" bash pipelines/stacked_ensemble/predict.sh \
+  /path/to/new_samples.csv predictions.csv --model-dir pipelines/stacked_ensemble/weights
 ```
 
 Prediction CSVs contain `sample_id`, `prob_ati`, and `pred_label`; labeled inputs
@@ -154,20 +161,20 @@ meaningful predictions. Metrics on training data describe fit, not unseen perfor
 
 ```text
 MedAI/
-├── kidney/              # Main ensemble and ablation pipeline
-├── Nav/                 # Boosting, linear, LDA, and PLS experiments
-├── Felix/kidney/        # TabPFN pipeline
-├── data/                # Local training snapshot
-├── research/            # Challenge materials and modeling research
-├── requirements/        # Shared, optional, and development dependencies
-├── tests/               # Regression and synthetic pipeline checks
-├── requirements.txt     # Core environment
-└── pyproject.toml       # Lint and formatting configuration
+├── pipelines/             # Modeling pipelines
+│   ├── stacked_ensemble/  # Main ensemble and ablation pipeline
+│   ├── panel_ensemble/    # Boosting, linear, LDA, and PLS experiments
+│   └── tabpfn/            # TabPFN pipeline
+├── data/                  # Local training data (not tracked)
+├── requirements/          # Shared, optional, and development dependencies
+├── tests/                 # Regression and synthetic pipeline checks
+├── requirements.txt       # Core environment
+└── pyproject.toml         # Lint and formatting configuration
 ```
 
-Each track contains `evaluate.py`, `train.py`, `predict.py`, `model.py`, and
+Each pipeline contains `evaluate.py`, `train.py`, `predict.py`, `model.py`, and
 `preprocess.py`. Evaluation writes metrics and recipes under `results/`; training
-writes artifacts under `weights/`. Research notes and result tables retain the
+writes artifacts under `weights/`. Saved result tables retain the
 experimental progression. New smoke-run directories, serialized joblib weights,
 local data files, and predictions are ignored by Git; already tracked files
 remain tracked.

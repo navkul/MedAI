@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-train.py — Train the final Nav model bundle from a CV-derived recipe
+train.py — Train the final panel ensemble bundle from a CV-derived recipe
 ====================================================================
 """
 
@@ -37,17 +37,19 @@ logging.basicConfig(
 )
 
 _SCRIPT_DIR = Path(__file__).resolve().parent
-_DEFAULT_DATA = _SCRIPT_DIR.parent / "data" / "train.csv"
+_DEFAULT_DATA = _SCRIPT_DIR.parents[1] / "data" / "train.csv"
 _DEFAULT_WEIGHTS = _SCRIPT_DIR / "weights"
 _DEFAULT_RECIPE = _SCRIPT_DIR / "results" / "final_recipe.json"
 
 
 def parse_args():
-    p = argparse.ArgumentParser(description="Train final ATI models and save the Nav bundle.")
+    p = argparse.ArgumentParser(
+        description="Train final ATI models and save the panel ensemble bundle."
+    )
     p.add_argument(
         "--data",
         default=str(_DEFAULT_DATA),
-        help="Path to training CSV (default: ../data/train.csv)",
+        help="Path to training CSV (default: ../../data/train.csv)",
     )
     p.add_argument(
         "--out",

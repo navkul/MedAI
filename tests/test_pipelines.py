@@ -15,7 +15,7 @@ import pandas as pd
 from xgboost import XGBClassifier
 
 ROOT = Path(__file__).resolve().parents[1]
-TRACKS = ("kidney", "Nav", "Felix/kidney")
+TRACKS = ("pipelines/stacked_ensemble", "pipelines/panel_ensemble", "pipelines/tabpfn")
 
 
 class PipelineTests(unittest.TestCase):
@@ -78,7 +78,7 @@ class PipelineTests(unittest.TestCase):
         for workers, hash_seed in ((1, "11"), (2, "29")):
             out = self.work / f"main-results-{workers}"
             self.run_script(
-                "kidney",
+                "pipelines/stacked_ensemble",
                 "evaluate.py",
                 "--data",
                 self.data,
@@ -104,7 +104,7 @@ class PipelineTests(unittest.TestCase):
 
         weights = self.work / "main-weights"
         self.run_script(
-            "kidney",
+            "pipelines/stacked_ensemble",
             "train.py",
             "--data",
             self.data,
@@ -117,7 +117,7 @@ class PipelineTests(unittest.TestCase):
         )
         output = self.work / "nested" / "main.csv"
         self.run_script(
-            "kidney",
+            "pipelines/stacked_ensemble",
             "predict.py",
             "--data",
             self.data,
@@ -138,7 +138,7 @@ class PipelineTests(unittest.TestCase):
         wrapped_output = self.work / "wrapper" / "main.csv"
         self.run_command(
             "bash",
-            ROOT / "kidney" / "predict.sh",
+            ROOT / "pipelines/stacked_ensemble" / "predict.sh",
             shuffled_data,
             wrapped_output,
             "--model-dir",
@@ -148,11 +148,11 @@ class PipelineTests(unittest.TestCase):
         actual = self.assert_predictions(wrapped_output, labeled=False)
         np.testing.assert_allclose(expected["prob_ati"], actual["prob_ati"])
 
-    def test_nav_model_families_and_artifact_round_trip(self):
+    def test_panel_ensemble_model_families_and_artifact_round_trip(self):
         results = self.work / "nav-results"
         weights = self.work / "nav-weights"
         self.run_script(
-            "Nav",
+            "pipelines/panel_ensemble",
             "evaluate.py",
             "--data",
             self.data,
@@ -168,7 +168,7 @@ class PipelineTests(unittest.TestCase):
         metrics = pd.read_csv(results / "cv_results.csv")
         self.assertEqual(metrics["model"].nunique(), 6)
         self.run_script(
-            "Nav",
+            "pipelines/panel_ensemble",
             "train.py",
             "--data",
             self.data,
@@ -182,7 +182,7 @@ class PipelineTests(unittest.TestCase):
         output = self.work / "nested" / "nav.csv"
         self.run_command(
             "bash",
-            ROOT / "Nav" / "predict.sh",
+            ROOT / "pipelines/panel_ensemble" / "predict.sh",
             self.data,
             output,
             "--model-dir",
@@ -191,7 +191,7 @@ class PipelineTests(unittest.TestCase):
         )
         self.assert_predictions(output, labeled=True)
 
-    def test_nav_proteomics_only_selection_in_evaluation_and_training(self):
+    def test_panel_ensemble_proteomics_only_selection_in_evaluation_and_training(self):
         code = """
 import sys
 import pandas as pd
@@ -224,10 +224,10 @@ assert len(expected) == 3 and not set(expected).intersection(CLINICAL_FEATURES)
             "-c",
             code,
             self.data,
-            env={"PYTHONPATH": str(ROOT / "Nav")},
+            env={"PYTHONPATH": str(ROOT / "pipelines/panel_ensemble")},
         )
 
-    def test_nav_fallback_respects_custom_model_directory(self):
+    def test_panel_ensemble_fallback_respects_custom_model_directory(self):
         # A custom directory with no ensemble config must load its own XGBoost.
         weights = self.work / "nav-fallback"
         weights.mkdir()
@@ -238,7 +238,7 @@ assert len(expected) == 3 and not set(expected).intersection(CLINICAL_FEATURES)
         (weights / "feature_cols.json").write_text(json.dumps(features))
         output = self.work / "nested" / "fallback.csv"
         self.run_script(
-            "Nav",
+            "pipelines/panel_ensemble",
             "predict.py",
             "--data",
             self.data,
@@ -273,7 +273,7 @@ missing = build_feature_frame(frame.drop(columns=selected[0]), selected)
 assert missing[selected[0]].isna().all()
 pd.testing.assert_frame_equal(missing[selected[1:]], expected[selected[1:]])
 """
-        for track in ("Nav", "Felix/kidney"):
+        for track in ("pipelines/panel_ensemble", "pipelines/tabpfn"):
             with self.subTest(track=track):
                 self.run_command(
                     sys.executable,
@@ -298,7 +298,7 @@ pd.testing.assert_frame_equal(missing[selected[1:]], expected[selected[1:]])
         output = self.work / "nested" / "tabpfn-interface.csv"
         self.run_command(
             "bash",
-            ROOT / "Felix/kidney" / "predict.sh",
+            ROOT / "pipelines/tabpfn" / "predict.sh",
             self.data,
             output,
             "--model-dir",

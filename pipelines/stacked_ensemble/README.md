@@ -3,7 +3,7 @@
 ## Scope
 
 This track implements repeated validation, clinical ablations, and model
-ensembling for ATI prediction. See the [project README](../README.md) for the
+ensembling for ATI prediction. See the [project README](../../README.md) for the
 full project context, preserved modeling tracks, and recorded results.
 
 The implemented approaches are:
@@ -27,20 +27,20 @@ The implementation is built around the actual local training file:
 - `sex`
 - `baseline_egfr_23`
 
-The local dataset is smaller than the planned cohort sizes in the research notes.
+The local dataset is smaller than the planned cohort sizes in the challenge materials.
 
 ## Setup
 
 Use Python 3.12 and an activated virtual environment. From the repository root:
 
 ```bash
-python -m pip install -r kidney/requirements.txt
+python -m pip install -r pipelines/stacked_ensemble/requirements.txt
 # Optional, for lgbm_fs1 and lgbm_fs2:
 python -m pip install -r requirements/lightgbm.txt
 ```
 
-Commands below run from `kidney/`. From the root, prefix script paths with
-`kidney/`. Evaluation defaults to five folds and three repeats; use `--repeats 1`
+Commands below run from `pipelines/stacked_ensemble/`. From the root, prefix
+script paths with `pipelines/stacked_ensemble/`. Evaluation defaults to five folds and three repeats; use `--repeats 1`
 for a shorter run. Early stopping uses validation labels, and ensemble search
 is not evaluated with a fully nested outer CV. See the root README for how to
 interpret the results.
@@ -113,14 +113,14 @@ python evaluate.py
 Or with explicit paths:
 
 ```bash
-python evaluate.py --data ../data/train.csv --out ./results
+python evaluate.py --data ../../data/train.csv --out ./results
 ```
 
 8-core SCC-style example using outer parallelism and LightGBM when installed:
 
 ```bash
 python evaluate.py \
-  --data ../data/train.csv \
+  --data ../../data/train.csv \
   --out ./results_lgbm \
   --repeats 4 \
   --models xgb_fs1 xgb_fs2 lgbm_fs2 \
@@ -153,7 +153,7 @@ python train.py
 Or:
 
 ```bash
-python train.py --data ../data/train.csv --results-dir ./results --out ./weights
+python train.py --data ../../data/train.csv --results-dir ./results --out ./weights
 ```
 
 Key outputs in `./weights/`:

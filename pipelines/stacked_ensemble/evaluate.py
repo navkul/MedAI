@@ -50,7 +50,7 @@ logging.basicConfig(
 )
 
 _SCRIPT_DIR = Path(__file__).resolve().parent
-_DEFAULT_DATA = _SCRIPT_DIR.parent / "data" / "train.csv"
+_DEFAULT_DATA = _SCRIPT_DIR.parents[1] / "data" / "train.csv"
 _DEFAULT_OUT = _SCRIPT_DIR / "results"
 _WORKER_DF = None
 _WORKER_Y = None
@@ -64,7 +64,7 @@ def parse_args():
     p.add_argument(
         "--data",
         default=str(_DEFAULT_DATA),
-        help="Path to training CSV (default: ../data/train.csv)",
+        help="Path to training CSV (default: ../../data/train.csv)",
     )
     p.add_argument(
         "--out",

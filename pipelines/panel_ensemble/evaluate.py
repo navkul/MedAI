@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-evaluate.py — Repeated leakage-safe CV for Nav's selected ATI models
+evaluate.py — Repeated leakage-safe CV for the panel ensemble ATI models
 ====================================================================
 """
 
@@ -50,16 +50,18 @@ logging.basicConfig(
 )
 
 _SCRIPT_DIR = Path(__file__).resolve().parent
-_DEFAULT_DATA = _SCRIPT_DIR.parent / "data" / "train.csv"
+_DEFAULT_DATA = _SCRIPT_DIR.parents[1] / "data" / "train.csv"
 _DEFAULT_OUT = _SCRIPT_DIR / "results"
 
 
 def parse_args():
-    p = argparse.ArgumentParser(description="Run repeated leakage-safe CV for Nav's ATI model set.")
+    p = argparse.ArgumentParser(
+        description="Run repeated leakage-safe CV for the panel ensemble ATI model set."
+    )
     p.add_argument(
         "--data",
         default=str(_DEFAULT_DATA),
-        help="Path to training CSV (default: ../data/train.csv)",
+        help="Path to training CSV (default: ../../data/train.csv)",
     )
     p.add_argument(
         "--out",
@@ -97,7 +99,7 @@ def parse_args():
         "--models",
         nargs="+",
         default=list(BASE_MODEL_SPECS),
-        help="Base model names to evaluate (default: all registered Nav base models).",
+        help="Base model names to evaluate (default: all registered base models).",
     )
     p.add_argument(
         "--blend-models",

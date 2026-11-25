@@ -14,7 +14,7 @@ classification problem:
 | **1** | ATI present |
 
 The final leaderboard metric is **log loss** on an external held-out cohort, so
-the Felix pipeline now focuses on a single deployment path:
+this pipeline focuses on a single deployment path:
 
 - TabPFN v2 classifier
 - top-k protein filtering before modeling
@@ -53,9 +53,9 @@ limits.
 # From the repository root, using Python 3.12:
 python3.12 -m venv .venv-tabpfn
 source .venv-tabpfn/bin/activate
-pip install -r Felix/kidney/requirements.txt
+pip install -r pipelines/tabpfn/requirements.txt
 # Run the commands below from this workspace:
-cd Felix/kidney
+cd pipelines/tabpfn
 ```
 
 `requirements.txt` now pins `tabpfn==2.0.0`.
@@ -139,7 +139,7 @@ Output columns:
 ## File Structure
 
 ```text
-Felix/kidney/
+pipelines/tabpfn/
 ├── evaluate.py
 ├── model.py
 ├── predict.py

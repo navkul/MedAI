@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-ensemble_utils.py — Shared fitting and blending helpers for Nav experiments
+ensemble_utils.py — Shared fitting and blending helpers for the panel ensemble pipeline
 ==========================================================================
 """
 

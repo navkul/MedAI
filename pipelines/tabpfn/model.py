@@ -2,7 +2,7 @@
 """
 model.py — TabPFN model configuration and artifact constants
 ============================================================
-Central place for the Felix kidney pipeline configuration.
+Central place for the TabPFN pipeline configuration.
 
 This branch now deploys a single model family:
     TabPFN v2 classifier on top-k proteins + clinical covariates

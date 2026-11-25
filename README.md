@@ -205,3 +205,8 @@ Tests use synthetic data and temporary outputs without replacing saved models
 or downloading TabPFN checkpoints. No `.env` file is required: configuration
 comes from CLI arguments, and the pipelines do not consume API credentials.
 Local `.env` files are ignored if a future integration needs them.
+
+## Authors
+
+- **Arnav Kulkarni** — [@navkul](https://github.com/navkul)
+- **Felix Tuchscherer** — [@ftuchsch](https://github.com/ftuchsch)
